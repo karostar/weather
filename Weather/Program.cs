@@ -11,16 +11,14 @@ var pogoda = new Weather.Pogoda
     temperatura = 29
 };
 
-string jsonString = JsonSerializer.Serialize(pogoda);
+//string jsonString = JsonSerializer.Serialize(pogoda);
 
-Weather.Pogoda pogoda1 =
-                JsonSerializer.Deserialize<Weather.Pogoda>(jsonString);
+//Weather.Pogoda pogoda1 = JsonSerializer.Deserialize<Weather.Pogoda>(jsonString);
 
 //Console.WriteLine($"Data: {pogoda1.data}");
 //Console.WriteLine($"Temperatura: {pogoda1.temperatura}");
 
 //app.MapPost("/", () => "This is a POST");
-//app.MapGet("/", () => "Hello World");
-app.MapGet("/", () => pogoda1.data+ Environment.NewLine + pogoda1.temperatura+" stopni Celsjusza");
+app.MapGet("/", () => pogoda.data + Environment.NewLine + pogoda.temperatura + " stopni Celsjusza");
 app.MapGet("/bye", () => "Goodbye World");
 app.Run();

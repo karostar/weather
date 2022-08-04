@@ -2,7 +2,6 @@
 using Weather;
 
 var builder = WebApplication.CreateBuilder();
-//builder.Logging.AddJsonConsole();
 //builder.Services.AddScoped<>();
 var app = builder.Build();
 
@@ -17,8 +16,21 @@ List<Pogoda> pogoda = new List<Pogoda>
 
 //Weather.Pogoda pogoda1 = JsonSerializer.Deserialize<Weather.Pogoda>(jsonString);
 
-app.MapGet("/", () => pogoda);
-app.MapPost("/add", (Pogoda p) => "$Dodano nową prognozę");
+app.MapGet("/pogoda", () => pogoda);
+app.MapGet("/pogoda/{id}", (int id) => pogoda[id]);
+app.MapPost("/pogoda", (Pogoda p) => { 
+    pogoda.Add(p);
+});
+
+app.MapPut("/pogoda/{id}", (int id, Pogoda p) => {
+    pogoda[id].data = p.data;
+    pogoda[id].temperatura = p.temperatura;
+});
+
+app.MapDelete("/pogoda/{id}", (int id) => {
+    pogoda.Remove(pogoda[id]);
+});
+
 //app.MapGet("/", () => pogoda[1].data + Environment.NewLine + pogoda[1].temperatura + " stopni Celsjusza");
 app.MapGet("/bye", () => "Goodbye World");
 app.Run();

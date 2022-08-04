@@ -1,36 +1,35 @@
 ﻿using System.Text.Json;
+using System.Linq;
 using Weather;
 
 var builder = WebApplication.CreateBuilder();
 //builder.Services.AddScoped<>();
 var app = builder.Build();
 
-List<Pogoda> pogoda = new List<Pogoda>
+Random rand = new Random();
+
+List<WeatherMeasurements> measurements = new List<WeatherMeasurements>
 {
-    new Pogoda{data=DateTime.Now, temperatura=22},
-    new Pogoda{data=DateTime.Now.AddDays(1), temperatura=26},
-    new Pogoda{data=DateTime.Now.AddDays(2), temperatura=21}
+    new WeatherMeasurements{date=new DateTime(2022,1,1), temperatureC=rand.Next(-20,50)}
 };
 
-//string jsonString = JsonSerializer.Serialize(pogoda);
+app.MapGet("/measurements", () => measurements); //returns all entries
 
-//Weather.Pogoda pogoda1 = JsonSerializer.Deserialize<Weather.Pogoda>(jsonString);
+app.MapGet("/measurements/{year}/{month}/{day}", (int year, int month, int day) => { //returns entries by date
+    
+    foreach (var item in measurements)
+    {
+        
+    }
+    
+    //bool has = measurements.Any(cus => cus.date == 2022);
+    //measurements[id];
+}); 
 
-app.MapGet("/pogoda", () => pogoda);
-app.MapGet("/pogoda/{id}", (int id) => pogoda[id]);
-app.MapPost("/pogoda", (Pogoda p) => { 
-    pogoda.Add(p);
+app.MapGet("/measurements/current", () => {  //creates a new entry
+    DateTime dateTime = DateTime.Now;
+    measurements.Add(new WeatherMeasurements{date=dateTime, temperatureC=rand.Next(-20,50)});
+    return measurements[measurements.Count-1]; //returns current entry
 });
 
-app.MapPut("/pogoda/{id}", (int id, Pogoda p) => {
-    pogoda[id].data = p.data;
-    pogoda[id].temperatura = p.temperatura;
-});
-
-app.MapDelete("/pogoda/{id}", (int id) => {
-    pogoda.Remove(pogoda[id]);
-});
-
-//app.MapGet("/", () => pogoda[1].data + Environment.NewLine + pogoda[1].temperatura + " stopni Celsjusza");
-app.MapGet("/bye", () => "Goodbye World");
 app.Run();

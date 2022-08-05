@@ -16,9 +16,9 @@ List<WeatherMeasurements> measurements = new List<WeatherMeasurements>
     new WeatherMeasurements{date=new DateTime(2021,10,3), temperatureC=rand.Next(-20,50)}
 };
 
-app.MapGet("/measurements", () => measurements); //returns all entries
+app.MapGet("/weather", () => measurements); //returns all entries
 
-app.MapGet("/measurements/{year}/{month}/{day}", (int year, int month, int day) => { //returns entries by full date
+app.MapGet("/weather/{year}/{month}/{day}", (int year, int month, int day) => { //returns entries by full date
     DateTime dateTime = new DateTime(year, month, day);
     var dateOnly=dateTime.ToShortDateString();
     List<WeatherMeasurements> tempMeasurements = new List<WeatherMeasurements> { };
@@ -31,7 +31,7 @@ app.MapGet("/measurements/{year}/{month}/{day}", (int year, int month, int day) 
     return tempMeasurements;
 });
 
-app.MapGet("/measurements/{year}/{month}", (int year, int month) => { //returns entries by month
+app.MapGet("/weather/{year}/{month}", (int year, int month) => { //returns entries by month
     List<WeatherMeasurements> tempMeasurements = new List<WeatherMeasurements> { };
 
     foreach (var item in measurements)
@@ -42,7 +42,7 @@ app.MapGet("/measurements/{year}/{month}", (int year, int month) => { //returns 
     return tempMeasurements;
 });
 
-app.MapGet("/measurements/{year}", (int year) => { //returns entries by year
+app.MapGet("/weather/{year}", (int year) => { //returns entries by year
     List<WeatherMeasurements> tempMeasurements = new List<WeatherMeasurements> { };
 
     foreach (var item in measurements)
@@ -53,7 +53,7 @@ app.MapGet("/measurements/{year}", (int year) => { //returns entries by year
     return tempMeasurements;
 });
 
-app.MapGet("/measurements/current", () => {  //creates a new entry
+app.MapGet("/weather/current", () => {  //creates a new entry
     DateTime dateTime = DateTime.Now;
     measurements.Add(new WeatherMeasurements{date=dateTime, temperatureC=rand.Next(-20,50)});
     return measurements[measurements.Count-1]; //returns current entry

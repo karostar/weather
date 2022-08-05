@@ -10,6 +10,7 @@ var app = builder.Build();
 
 Random rand = new Random();
 
+// Test
 //app.MapGet("/weather", async (WeatherMeasurementsDb db) => await db.weatherMeasurements.Select(x => new WeatherMeasurementsDTO(x)).ToListAsync()); //returns all entries
 
 app.MapGet("/weather", async (WeatherMeasurementsDb db, [FromQuery] DateTime? from) => { //returns entries by full date

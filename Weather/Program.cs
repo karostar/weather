@@ -2,6 +2,7 @@
 using System.Linq;
 using Weather;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder();
 builder.Services.AddDbContext<WeatherMeasurementsDb>(options => options.UseInMemoryDatabase("results"));
@@ -9,20 +10,11 @@ var app = builder.Build();
 
 Random rand = new Random();
 
-app.MapGet("/weather", async (WeatherMeasurementsDb db) => await db.weatherMeasurements.ToListAsync()); //returns all entries
+//app.MapGet("/weather", async (WeatherMeasurementsDb db) => await db.weatherMeasurements.Select(x => new WeatherMeasurementsDTO(x)).ToListAsync()); //returns all entries
 
-app.MapGet("/weather/{year}/{month}/{day}", async (WeatherMeasurementsDb db, int year, int month, int day) => { //returns entries by full date
-    var data = from WeatherMeasurementsDb in db.weatherMeasurements where WeatherMeasurementsDb.date.Year == year && WeatherMeasurementsDb.date.Month==month && WeatherMeasurementsDb.date.Day==day select WeatherMeasurementsDb;
-    return data;
-});
-
-app.MapGet("/weather/{year}/{month}", async (WeatherMeasurementsDb db, int year, int month) => { //returns entries by month
-    var data = from WeatherMeasurementsDb in db.weatherMeasurements where WeatherMeasurementsDb.date.Year == year && WeatherMeasurementsDb.date.Month == month select WeatherMeasurementsDb;
-    return data;
-});
-
-app.MapGet("/weather/{year}", async (WeatherMeasurementsDb db, int year) => { //returns entries by year
-    var data = from WeatherMeasurementsDb in db.weatherMeasurements where WeatherMeasurementsDb.date.Year == year select WeatherMeasurementsDb;
+app.MapGet("/weather", async (WeatherMeasurementsDb db, [FromQuery] DateTime? from) => { //returns entries by full date
+    var data = from WeatherMeasurementsDb in db.weatherMeasurements
+               where !@from.HasValue || WeatherMeasurementsDb.date > @from select WeatherMeasurementsDb;
     return data;
 });
 

@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 //configuration
 var builder = WebApplication.CreateBuilder();
-builder.Services.AddDbContext<WeatherMeasurementDb>(options => options.UseInMemoryDatabase("results"));
+builder.Services.AddDbContext<WeatherMeasurementDb>(options => 
+options.UseSqlServer("Server=.\\SQLEXPRESS;Database=WeatherDatabase;Trusted_Connection=True;"));
+
 builder.Services.AddSingleton<IMeasurementSource, MeasurementSource>();
 
 var app = builder.Build();

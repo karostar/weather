@@ -14,6 +14,7 @@
             WeatherMeasurement w = new WeatherMeasurement();
             w.Date = dateTime;
             w.TemperatureC = rand.Next(-20, 50);
+            w.WindStrength = rand.Next(0, 100);
             return w;
         }
     }

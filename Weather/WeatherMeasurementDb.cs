@@ -6,6 +6,5 @@ namespace Weather
     {
         public WeatherMeasurementDb(DbContextOptions options) : base(options) {}
         public DbSet<WeatherMeasurement> WeatherMeasurements { get; set; }
-        
     }
 }

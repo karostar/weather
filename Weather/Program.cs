@@ -3,12 +3,12 @@ using System.Linq;
 using Weather;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 //configuration
 var builder = WebApplication.CreateBuilder();
 builder.Services.AddDbContext<WeatherMeasurementDb>(options => 
-options.UseSqlServer("Server=.\\SQLEXPRESS;Database=WeatherDatabase;Trusted_Connection=True;"));
-
+options.UseSqlServer("Server=.\\SQLEXPRESS;Database=WeatherDatabase2;Trusted_Connection=True;"));
 builder.Services.AddSingleton<IMeasurementSource, MeasurementSource>();
 
 var app = builder.Build();
@@ -64,5 +64,9 @@ app.MapGet("/measurements/current", async (IMeasurementSource source, WeatherMea
     await db.SaveChangesAsync();
     return Results.Created($"/weather/{w.Id}", w);
 });
+
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<WeatherMeasurementDb>();
+db.Database.Migrate();
 
 app.Run();

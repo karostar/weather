@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 //configuration
 var builder = WebApplication.CreateBuilder();
-builder.Services.AddDbContext<WeatherMeasurementDb>(options => 
+builder.Services.AddDbContext<ContextDb>(options => 
 options.UseSqlServer("Server=.\\SQLEXPRESS;Database=WeatherDatabase2;Trusted_Connection=True;"));
 builder.Services.AddSingleton<IMeasurementSource, MeasurementSource>();
 
@@ -15,58 +15,60 @@ var app = builder.Build();
 Random rand = new Random();
 
 //returns an entry by id
-app.MapGet("/measurements/{id}", async (WeatherMeasurementDb db, int id) =>
+app.MapGet("/measurements/{id}", async (ContextDb db, int id) =>
 {
-    var data = from WeatherMeasurementsDb
+    var data = from ContextDb
                in db.WeatherMeasurements
-               where WeatherMeasurementsDb.Id == id
-               select WeatherMeasurementsDb;
+               where ContextDb.WeatherMeasurementId == id
+               select ContextDb;
     return data;
 });
 
 //returns historic entries starting with chosen date
-app.MapGet("/measurements/from", async (WeatherMeasurementDb db, [FromQuery] DateTime? from) => 
+app.MapGet("/measurements/from", async (ContextDb db, [FromQuery] DateTime? from) => 
 { 
-    var data = from WeatherMeasurementsDb 
+    var data = from ContextDb
                in db.WeatherMeasurements 
-               where !@from.HasValue || WeatherMeasurementsDb.Date > @from
-               select WeatherMeasurementsDb;
+               where !@from.HasValue || ContextDb.Date > @from
+               select ContextDb;
     return data;
 });
 
 //returns historic entries between two dates
-app.MapGet("/measurements/timeperiod", async (WeatherMeasurementDb db, [FromQuery] DateTime? from, 
+app.MapGet("/measurements/timeperiod", async (ContextDb db, [FromQuery] DateTime? from, 
     DateTime? to) =>
 {
-    var data = from WeatherMeasurementsDb
+    var data = from ContextDb
                in db.WeatherMeasurements
                where !@from.HasValue || !to.HasValue 
-               || WeatherMeasurementsDb.Date > @from && WeatherMeasurementsDb.Date < to
-               select WeatherMeasurementsDb;
+               || ContextDb.Date > @from && ContextDb.Date < to
+               select ContextDb;
     return data;
 });
 
 //returns historic entries before chosen date
-app.MapGet("/measurements/to", async (WeatherMeasurementDb db, [FromQuery] DateTime? to) =>
+app.MapGet("/measurements/to", async (ContextDb db, [FromQuery] DateTime? to) =>
 {
-    var data = from WeatherMeasurementsDb
+    var data = from ContextDb
                in db.WeatherMeasurements
-               where !to.HasValue || WeatherMeasurementsDb.Date < to
-               select WeatherMeasurementsDb;
+               where !to.HasValue || ContextDb.Date < to
+               select ContextDb;
     return data;
 });
 
 //creates a new entry
-app.MapGet("/measurements/current", async (IMeasurementSource source, WeatherMeasurementDb db) => 
+app.MapGet("/measurements/current", async (IMeasurementSource source, ContextDb db) => 
 {
+    //var p = new WeatherPrediction();
+    //await db.WeatherPredictions.AddAsync(p);
     var w = source.GetCurrentMeasurement();
     await db.WeatherMeasurements.AddAsync(w);
     await db.SaveChangesAsync();
-    return Results.Created($"/weather/{w.Id}", w);
+    return Results.Created($"/weather/{w.WeatherMeasurementId}", w);
 });
 
 using var scope = app.Services.CreateScope();
-var db = scope.ServiceProvider.GetRequiredService<WeatherMeasurementDb>();
+var db = scope.ServiceProvider.GetRequiredService<ContextDb>();
 db.Database.Migrate();
 
 app.Run();

@@ -12,8 +12,8 @@ using Weather;
 namespace Weather.Migrations
 {
     [DbContext(typeof(ContextDb))]
-    [Migration("20220808111045_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20220808114531_IdNameChange")]
+    partial class IdNameChange
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -26,11 +26,11 @@ namespace Weather.Migrations
 
             modelBuilder.Entity("Weather.WeatherMeasurement", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("WeatherMeasurementId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WeatherMeasurementId"), 1L, 1);
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
@@ -38,7 +38,10 @@ namespace Weather.Migrations
                     b.Property<int>("TemperatureC")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<int>("WindStrength")
+                        .HasColumnType("int");
+
+                    b.HasKey("WeatherMeasurementId");
 
                     b.ToTable("WeatherMeasurements");
                 });

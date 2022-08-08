@@ -11,7 +11,7 @@ using Weather;
 
 namespace Weather.Migrations
 {
-    [DbContext(typeof(WeatherMeasurementDb))]
+    [DbContext(typeof(ContextDb))]
     [Migration("20220808111350_WindStrength")]
     partial class WindStrength
     {

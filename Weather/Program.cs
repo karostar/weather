@@ -2,51 +2,63 @@
 using System.Linq;
 using Weather;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
+//configuration
 var builder = WebApplication.CreateBuilder();
-builder.Services.AddDbContext<WeatherMeasurementsDb>(options => options.UseInMemoryDatabase("results"));
-var app = builder.Build();
+builder.Services.AddDbContext<WeatherMeasurementDb>(options => options.UseInMemoryDatabase("results"));
+builder.Services.AddSingleton<IMeasurementSource, MeasurementSource>();
 
+var app = builder.Build();
 Random rand = new Random();
 
-app.MapGet("/weather", async (WeatherMeasurementsDb db) => await db.weatherMeasurements.ToListAsync()); //returns all entries
-
-app.MapGet("/weather/{year}/{month}/{day}", async (WeatherMeasurementsDb db, int year, int month, int day) => { //returns entries by full date
-    var data = from WeatherMeasurementsDb in db.weatherMeasurements where WeatherMeasurementsDb.date.Year == year && WeatherMeasurementsDb.date.Month==month && WeatherMeasurementsDb.date.Day==day select WeatherMeasurementsDb;
+//returns an entry by id
+app.MapGet("/measurements/{id}", async (WeatherMeasurementDb db, int id) =>
+{
+    var data = from WeatherMeasurementsDb
+               in db.WeatherMeasurements
+               where WeatherMeasurementsDb.Id == id
+               select WeatherMeasurementsDb;
     return data;
 });
 
-app.MapGet("/weather/{year}/{month}", async (WeatherMeasurementsDb db, int year, int month) => { //returns entries by month
-    var data = from WeatherMeasurementsDb in db.weatherMeasurements where WeatherMeasurementsDb.date.Year == year && WeatherMeasurementsDb.date.Month == month select WeatherMeasurementsDb;
+//returns historic entries starting with chosen date
+app.MapGet("/measurements/from", async (WeatherMeasurementDb db, [FromQuery] DateTime? from) => 
+{ 
+    var data = from WeatherMeasurementsDb 
+               in db.WeatherMeasurements 
+               where !@from.HasValue || WeatherMeasurementsDb.Date > @from
+               select WeatherMeasurementsDb;
     return data;
 });
 
-app.MapGet("/weather/{year}", async (WeatherMeasurementsDb db, int year) => { //returns entries by year
-    var data = from WeatherMeasurementsDb in db.weatherMeasurements where WeatherMeasurementsDb.date.Year == year select WeatherMeasurementsDb;
+//returns historic entries between two dates
+app.MapGet("/measurements/timeperiod", async (WeatherMeasurementDb db, [FromQuery] DateTime? from, 
+    DateTime? to) =>
+{
+    var data = from WeatherMeasurementsDb
+               in db.WeatherMeasurements
+               where !@from.HasValue || !to.HasValue 
+               || WeatherMeasurementsDb.Date > @from && WeatherMeasurementsDb.Date < to
+               select WeatherMeasurementsDb;
     return data;
 });
 
-app.MapGet("/weather/current", async (WeatherMeasurementsDb db) => {  //creates a new entry
-    DateTime dateTime = DateTime.Now;
-    WeatherMeasurements w = new WeatherMeasurements();
-    w.date = dateTime;
-    w.temperatureC = rand.Next(-20, 50);
-
-    await db.weatherMeasurements.AddAsync(w);
-    await db.SaveChangesAsync();
-    return Results.Created($"/weather/{w.Id}", w);
+//returns historic entries before chosen date
+app.MapGet("/measurements/to", async (WeatherMeasurementDb db, [FromQuery] DateTime? to) =>
+{
+    var data = from WeatherMeasurementsDb
+               in db.WeatherMeasurements
+               where !to.HasValue || WeatherMeasurementsDb.Date < to
+               select WeatherMeasurementsDb;
+    return data;
 });
 
-app.MapGet("/weather/add", async (WeatherMeasurementsDb db) => {  //creates a new entry
-    int year = rand.Next(2005, 2022);
-    int month = rand.Next(1, 12);
-    int day = rand.Next(1, 30);
-    DateTime dateTime = new DateTime(year, month, day);
-    WeatherMeasurements w = new WeatherMeasurements();
-    w.date = dateTime;
-    w.temperatureC = rand.Next(-20, 50);
-
-    await db.weatherMeasurements.AddAsync(w);
+//creates a new entry
+app.MapGet("/measurements/current", async (IMeasurementSource source, WeatherMeasurementDb db) => 
+{
+    var w = source.GetCurrentMeasurement();
+    await db.WeatherMeasurements.AddAsync(w);
     await db.SaveChangesAsync();
     return Results.Created($"/weather/{w.Id}", w);
 });

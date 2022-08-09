@@ -15,6 +15,17 @@
             w.Date = dateTime;
             w.TemperatureC = rand.Next(-20, 50);
             w.WindStrength = rand.Next(0, 100);
+
+            for (int i = 1; i < 4; i++)
+            {
+                WeatherPrediction p = new WeatherPrediction();
+                p.TemperatureCPrediction = rand.Next(-20, 50);
+                var hour = (w.Date.Hour+i) % 24;
+                p.Time = new TimeSpan(hour, 0, 0);
+                w.WeatherPredictions.Add(p);
+
+            }
+
             return w;
         }
     }

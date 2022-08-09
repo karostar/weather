@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Weather;
 
@@ -11,9 +12,10 @@ using Weather;
 namespace Weather.Migrations
 {
     [DbContext(typeof(ContextDb))]
-    partial class WeatherMeasurementDbModelSnapshot : ModelSnapshot
+    [Migration("20220809103451_Relations4")]
+    partial class Relations4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +50,7 @@ namespace Weather.Migrations
                 {
                     b.OwnsMany("Weather.WeatherPrediction", "WeatherPredictions", b1 =>
                         {
-                            b1.Property<int>("ParentId")
+                            b1.Property<int>("WeatherMeasurementId")
                                 .HasColumnType("int");
 
                             b1.Property<int>("Id")
@@ -63,12 +65,12 @@ namespace Weather.Migrations
                             b1.Property<TimeSpan>("Time")
                                 .HasColumnType("time");
 
-                            b1.HasKey("ParentId", "Id");
+                            b1.HasKey("WeatherMeasurementId", "Id");
 
                             b1.ToTable("WeatherPredictions");
 
                             b1.WithOwner()
-                                .HasForeignKey("ParentId");
+                                .HasForeignKey("WeatherMeasurementId");
                         });
 
                     b.Navigation("WeatherPredictions");

@@ -59,13 +59,23 @@ app.MapGet("/measurements/to", async (ContextDb db, [FromQuery] DateTime? to) =>
 //creates a new entry
 app.MapGet("/measurements/current", async (IMeasurementSource source, ContextDb db) => 
 {
-    //var p = new WeatherPrediction();
-    //await db.WeatherPredictions.AddAsync(p);
     var w = source.GetCurrentMeasurement();
     await db.WeatherMeasurements.AddAsync(w);
     await db.SaveChangesAsync();
     return Results.Created($"/weather/{w.WeatherMeasurementId}", w);
 });
+
+//returns weather predictions for chosen measurement
+app.MapGet("measurements/{id}/predictions", async (ContextDb db, int id) =>
+{
+    var predictions = db.WeatherMeasurements
+        .Include(predictions => predictions.WeatherPredictions)
+        .Where(predictions => predictions.WeatherMeasurementId == id)
+       .ToList()
+       .SelectMany(w => w.WeatherPredictions)
+        .ToList();
+    return predictions;
+}); 
 
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<ContextDb>();

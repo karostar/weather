@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Weather;
 
@@ -11,9 +12,10 @@ using Weather;
 namespace Weather.Migrations
 {
     [DbContext(typeof(ContextDb))]
-    partial class WeatherMeasurementDbModelSnapshot : ModelSnapshot
+    [Migration("20220809082152_Relations2")]
+    partial class Relations2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,33 +46,39 @@ namespace Weather.Migrations
                     b.ToTable("WeatherMeasurements");
                 });
 
+            modelBuilder.Entity("Weather.WeatherPrediction", b =>
+                {
+                    b.Property<int>("WeatherPredictionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WeatherPredictionId"), 1L, 1);
+
+                    b.Property<int>("TemperatureCPrediction")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("Time")
+                        .HasColumnType("time");
+
+                    b.Property<int?>("WeatherMeasurementId")
+                        .HasColumnType("int");
+
+                    b.HasKey("WeatherPredictionId");
+
+                    b.HasIndex("WeatherMeasurementId");
+
+                    b.ToTable("WeatherPredictions");
+                });
+
+            modelBuilder.Entity("Weather.WeatherPrediction", b =>
+                {
+                    b.HasOne("Weather.WeatherMeasurement", null)
+                        .WithMany("WeatherPredictions")
+                        .HasForeignKey("WeatherMeasurementId");
+                });
+
             modelBuilder.Entity("Weather.WeatherMeasurement", b =>
                 {
-                    b.OwnsMany("Weather.WeatherPrediction", "WeatherPredictions", b1 =>
-                        {
-                            b1.Property<int>("ParentId")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"), 1L, 1);
-
-                            b1.Property<int>("TemperatureCPrediction")
-                                .HasColumnType("int");
-
-                            b1.Property<TimeSpan>("Time")
-                                .HasColumnType("time");
-
-                            b1.HasKey("ParentId", "Id");
-
-                            b1.ToTable("WeatherPredictions");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ParentId");
-                        });
-
                     b.Navigation("WeatherPredictions");
                 });
 #pragma warning restore 612, 618

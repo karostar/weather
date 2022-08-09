@@ -9,6 +9,6 @@ namespace Weather
         public int TemperatureC { get; set; }
         public int WindStrength { get; set; }
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-        public List<WeatherPrediction>? WeatherPredictions { get; set; }
+        public List<WeatherPrediction> WeatherPredictions { get; set; } = new();
     }
 }

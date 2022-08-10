@@ -5,16 +5,25 @@
         WeatherMeasurement GetCurrentMeasurement();
     }
 
+
     public class MeasurementSource : IMeasurementSource
     {
+        async Task<Temperature> RunClient()
+        {
+            string _address = "https://localhost:57826/temperature";
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = await client.GetAsync(_address);
+            response.EnsureSuccessStatusCode();
+            var temperature = await response.Content.ReadAsAsync<Temperature>();
+            return temperature;
+        }
         public WeatherMeasurement GetCurrentMeasurement()
         {
-            Random rand = new Random();
-            DateTime dateTime = DateTime.Now;
+            Temperature t = RunClient().Result;
             WeatherMeasurement w = new WeatherMeasurement();
-            w.Date = dateTime;
-            w.TemperatureC = rand.Next(-20, 50);
-            w.WindStrength = rand.Next(0, 100);
+            w.Date = t.Date;
+            w.TemperatureC = t.TemperatureC;
+            Random rand = new Random();
 
             for (int i = 1; i < 4; i++)
             {

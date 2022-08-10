@@ -14,17 +14,16 @@ builder.Services.AddSingleton<IMeasurementSource, MeasurementSource>();
 
 var app = builder.Build();
 Random rand = new Random();
-
-string _address = "https://localhost:57826/temperature";
-HttpClient client = new HttpClient();
-
+/*
 async Task<Temperature> RunClient()
 {
+    string _address = "https://localhost:57826/temperature";
+    HttpClient client = new HttpClient();
     HttpResponseMessage response = await client.GetAsync(_address);
     response.EnsureSuccessStatusCode();
     var temperature = await response.Content.ReadAsAsync<Temperature>();
     return temperature;
-}
+} */
 
 //returns an entry by id
 app.MapGet("/measurements/{id}", async (ContextDb db, int id) =>
@@ -71,11 +70,7 @@ app.MapGet("/measurements/to", async (ContextDb db, [FromQuery] DateTime? to) =>
 //creates a new entry
 app.MapGet("/measurements/current", async (IMeasurementSource source, ContextDb db) => 
 {
-    Temperature t = RunClient().Result;
-    WeatherMeasurement w = new WeatherMeasurement();
-    w.Date = t.Date;
-    w.TemperatureC = t.TemperatureC;
-    //var w = source.GetCurrentMeasurement();
+    var w = source.GetCurrentMeasurement();
     await db.WeatherMeasurements.AddAsync(w);
     await db.SaveChangesAsync();
     return Results.Created($"/weather/{w.WeatherMeasurementId}", w);

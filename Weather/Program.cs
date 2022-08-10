@@ -14,26 +14,20 @@ builder.Services.AddSingleton<IMeasurementSource, MeasurementSource>();
 
 var app = builder.Build();
 Random rand = new Random();
-Temperature? temperature = new Temperature();
 
 string _address = "https://localhost:57826/temperature";
 HttpClient client = new HttpClient();
 
-async void RunClient()
+async Task<Temperature> RunClient()
 {
-    var options = new JsonSerializerOptions
-    {
-        PropertyNameCaseInsensitive = true
-    };
     HttpResponseMessage response = await client.GetAsync(_address);
     response.EnsureSuccessStatusCode();
-    string jsonString = await response.Content.ReadAsStringAsync();
-    var temp = JsonSerializer.Deserialize<Temperature>(jsonString);
-    //temperature = await response.Content.ReadFromJsonAsync<Temperature> (options);
+    var temperature = await response.Content.ReadAsAsync<Temperature>();
+    return temperature;
 }
 
-    //returns an entry by id
-    app.MapGet("/measurements/{id}", async (ContextDb db, int id) =>
+//returns an entry by id
+app.MapGet("/measurements/{id}", async (ContextDb db, int id) =>
 {
     var data = from ContextDb
                in db.WeatherMeasurements
@@ -77,16 +71,14 @@ app.MapGet("/measurements/to", async (ContextDb db, [FromQuery] DateTime? to) =>
 //creates a new entry
 app.MapGet("/measurements/current", async (IMeasurementSource source, ContextDb db) => 
 {
-    RunClient();
-    //var test=temperature.Date;
-    //var test2=temperature.TemperatureC;
-    /*WeatherMeasurement w = new WeatherMeasurement();
-    w.Date = temperature.Date;
-    w.TemperatureC = temperature.TemperatureC;
+    Temperature t = RunClient().Result;
+    WeatherMeasurement w = new WeatherMeasurement();
+    w.Date = t.Date;
+    w.TemperatureC = t.TemperatureC;
     //var w = source.GetCurrentMeasurement();
     await db.WeatherMeasurements.AddAsync(w);
     await db.SaveChangesAsync();
-    return Results.Created($"/weather/{w.WeatherMeasurementId}", w); */
+    return Results.Created($"/weather/{w.WeatherMeasurementId}", w);
 });
 
 //returns weather predictions for chosen measurement

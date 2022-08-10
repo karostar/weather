@@ -4,6 +4,7 @@ using Weather;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Net.Http.Headers;
 
 //configuration
 var builder = WebApplication.CreateBuilder();
@@ -13,9 +14,26 @@ builder.Services.AddSingleton<IMeasurementSource, MeasurementSource>();
 
 var app = builder.Build();
 Random rand = new Random();
+Temperature? temperature = new Temperature();
 
-//returns an entry by id
-app.MapGet("/measurements/{id}", async (ContextDb db, int id) =>
+string _address = "https://localhost:57826/temperature";
+HttpClient client = new HttpClient();
+
+async void RunClient()
+{
+    var options = new JsonSerializerOptions
+    {
+        PropertyNameCaseInsensitive = true
+    };
+    HttpResponseMessage response = await client.GetAsync(_address);
+    response.EnsureSuccessStatusCode();
+    string jsonString = await response.Content.ReadAsStringAsync();
+    var temp = JsonSerializer.Deserialize<Temperature>(jsonString);
+    //temperature = await response.Content.ReadFromJsonAsync<Temperature> (options);
+}
+
+    //returns an entry by id
+    app.MapGet("/measurements/{id}", async (ContextDb db, int id) =>
 {
     var data = from ContextDb
                in db.WeatherMeasurements
@@ -59,10 +77,16 @@ app.MapGet("/measurements/to", async (ContextDb db, [FromQuery] DateTime? to) =>
 //creates a new entry
 app.MapGet("/measurements/current", async (IMeasurementSource source, ContextDb db) => 
 {
-    var w = source.GetCurrentMeasurement();
+    RunClient();
+    //var test=temperature.Date;
+    //var test2=temperature.TemperatureC;
+    /*WeatherMeasurement w = new WeatherMeasurement();
+    w.Date = temperature.Date;
+    w.TemperatureC = temperature.TemperatureC;
+    //var w = source.GetCurrentMeasurement();
     await db.WeatherMeasurements.AddAsync(w);
     await db.SaveChangesAsync();
-    return Results.Created($"/weather/{w.WeatherMeasurementId}", w);
+    return Results.Created($"/weather/{w.WeatherMeasurementId}", w); */
 });
 
 //returns weather predictions for chosen measurement
@@ -71,8 +95,8 @@ app.MapGet("measurements/{id}/predictions", async (ContextDb db, int id) =>
     var predictions = db.WeatherMeasurements
         .Include(predictions => predictions.WeatherPredictions)
         .Where(predictions => predictions.WeatherMeasurementId == id)
-       .ToList()
-       .SelectMany(w => w.WeatherPredictions)
+        .ToList()
+        .SelectMany(w => w.WeatherPredictions)
         .ToList();
     return predictions;
 }); 

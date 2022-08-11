@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Weather
+namespace Weather.Models
 {
     public class WeatherMeasurement
     {

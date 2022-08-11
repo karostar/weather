@@ -1,4 +1,6 @@
-﻿namespace Weather
+﻿using Weather.Models;
+
+namespace Weather
 {
     public interface IMeasurementSource
     {
@@ -8,7 +10,7 @@
 
     public class MeasurementSource : IMeasurementSource
     {
-        async Task<Temperature> RunClient()
+        private async Task<Temperature> RunClient()
         {
             string _address = "https://localhost:57826/temperature";
             HttpClient client = new HttpClient();

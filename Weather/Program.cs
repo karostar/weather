@@ -14,16 +14,6 @@ builder.Services.AddSingleton<IMeasurementSource, MeasurementSource>();
 
 var app = builder.Build();
 Random rand = new Random();
-/*
-async Task<Temperature> RunClient()
-{
-    string _address = "https://localhost:57826/temperature";
-    HttpClient client = new HttpClient();
-    HttpResponseMessage response = await client.GetAsync(_address);
-    response.EnsureSuccessStatusCode();
-    var temperature = await response.Content.ReadAsAsync<Temperature>();
-    return temperature;
-} */
 
 //returns an entry by id
 app.MapGet("/measurements/{id}", async (ContextDb db, int id) =>

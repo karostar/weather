@@ -1,4 +1,4 @@
-﻿namespace Weather
+﻿namespace Weather.Models
 {
     public class Temperature
     {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Weather.Models;
 
 namespace Weather
 {

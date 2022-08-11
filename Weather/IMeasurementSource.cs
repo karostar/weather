@@ -57,12 +57,14 @@ namespace Weather
         }
     }
 
-    public class NullMeasurementSource : IMeasurementSource
+    public class StaticMeasurementSource : IMeasurementSource
     {
+        public int Value { get; set; } = 0;
+
         public WeatherMeasurement GetCurrentMeasurement()
         {
             WeatherMeasurement w = new WeatherMeasurement();
-            w.TemperatureC = 0;
+            w.TemperatureC = Value;
             return w;
         }
     }

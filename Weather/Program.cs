@@ -25,37 +25,18 @@ app.MapGet("/measurements/{id}", async (ContextDb db, int id) =>
     return data;
 });
 
-//returns historic entries starting with chosen date
-app.MapGet("/measurements/from", async (ContextDb db, [FromQuery] DateTime? from) => 
-{ 
-    var data = from ContextDb
-               in db.WeatherMeasurements 
-               where !@from.HasValue || ContextDb.Date > @from
-               select ContextDb;
-    return data;
-});
-
 //returns historic entries between two dates
-app.MapGet("/measurements/timeperiod", async (ContextDb db, [FromQuery] DateTime? from, 
+app.MapGet("/measurements", async (ContextDb db, [FromQuery] DateTime? from, 
     DateTime? to) =>
 {
-    var data = from ContextDb
-               in db.WeatherMeasurements
-               where !@from.HasValue || !to.HasValue 
-               || ContextDb.Date > @from && ContextDb.Date < to
-               select ContextDb;
+    var data = from measurment in db.WeatherMeasurements
+               where !@from.HasValue || measurment.Date > @from.Value
+               where !to.HasValue || measurment.Date < to.Value
+               select measurment;
     return data;
 });
 
-//returns historic entries before chosen date
-app.MapGet("/measurements/to", async (ContextDb db, [FromQuery] DateTime? to) =>
-{
-    var data = from ContextDb
-               in db.WeatherMeasurements
-               where !to.HasValue || ContextDb.Date < to
-               select ContextDb;
-    return data;
-});
+
 
 //creates a new entry
 app.MapGet("/measurements/current", async (IMeasurementSource source, ContextDb db) => 
@@ -80,7 +61,10 @@ app.MapGet("measurements/{id}/predictions", async (ContextDb db, int id) =>
 
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<ContextDb>();
-db.Database.Migrate();
+if (db.Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory")
+{
+    db.Database.Migrate();
+}
 
 app.Run();
 

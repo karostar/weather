@@ -83,3 +83,5 @@ var db = scope.ServiceProvider.GetRequiredService<ContextDb>();
 db.Database.Migrate();
 
 app.Run();
+
+public partial class Program { }

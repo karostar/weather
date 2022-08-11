@@ -30,7 +30,7 @@ public class IntegrationTests
                     }
                     services.AddDbContext<ContextDb>(options =>
                         options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
-                    services.AddSingleton<IMeasurementSource>(source);
+                   // services.AddSingleton<IMeasurementSource>(source);
 
                 });
             });
